@@ -1,8 +1,12 @@
 var config = {
-  width: innerWidth,
-  height: innerHeight,
+  width: 3000,
+  height: 1950,
   backgroundColor: 0x000000,
-  scene: [scene1, scene2],
+  scene: [scene1,scene2],
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.BOTH_CENTER,
+  },
   pixelArt: true,
   physics: {
     default: "arcade",
@@ -11,12 +15,6 @@ var config = {
     },
   },
 };
-// var widthRatio = window.screen.width / 3440;
-// var heightRatio = window.screen.height / 1440;
-//var screenRatio = window.screen.height*window.screen.width/(3440*1440)
-var screenRatio = window.devicePixelRatio / 3;
-// var globalWidth = window.screen.width
-// var globalheight =window.screen.height * window.devicePixelRatio
 
 var gameSettings = {
   playerSpeed: 200,
@@ -25,3 +23,4 @@ var gameSettings = {
 window.onload = function () {
   var game = new Phaser.Game(config);
 };
+
