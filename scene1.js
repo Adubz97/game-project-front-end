@@ -35,6 +35,8 @@ class scene1 extends Phaser.Scene {
     this.load.image("zombie", "assets/images/zombie1_hold.png")
 
     this.load.image("zombieStunned", "assets/images/zombie1_stand.png")
+
+    this.load.image("flashlight", "assets/images/flashlight.png")
   }
   create() {
     this.add.text(20, 20, "Loading...");

@@ -5,9 +5,9 @@ class scene2 extends Phaser.Scene {
   constructor() {
     super("playGame");
   }
-
   create() {
     // Tiles
+
     let tiles = this.add.tileSprite(
       150,
       150,
@@ -60,6 +60,13 @@ class scene2 extends Phaser.Scene {
     let blackOverlay = this.add.image(0, 0, "black");
     blackOverlay.setOrigin(0, 0);
     blackOverlay.setAlpha(0.7);
+    // this.flashlight.anchor.setTo(0.5)
+    //.setOriginFromFrame();
+    // this.physics.arcade.enable(this.flashlight)
+
+    this.flashlight = this.physics.add.sprite(490, 490, "flashlight");
+    this.flashlight.setOrigin(0.13, 0.44);
+    this.flashlight.refreshBody();
 
     this.player = this.physics.add.sprite(500, 500, "player");
     this.player.setScale(3);
@@ -74,6 +81,8 @@ class scene2 extends Phaser.Scene {
     this.cursorKeys = this.input.keyboard.createCursorKeys();
     this.player.setCollideWorldBounds(true);
     this.physics.add.collider(this.player, walls);
+    this.physics.add.collider(this.zombie, walls);
+    this.physics.add.collider(this.zombie, this.flashlight);
 
     // this.input.on("pointermove", function (pointer) {
     //   this.reticle.x += pointer.movementX;
@@ -95,8 +104,19 @@ class scene2 extends Phaser.Scene {
       this.reticle.y
     );
     worldBounds = this.physics.world.bounds;
+
+    // this.graphics = this.add.graphics();
+
+    // this.physics.add.overlap(
+    //   this.flashlight,
+    //   this.zombie,
+    //   this.stunZombie(this.flashlight, this.zombie),
+    //   null,
+    //   this
+    // );
   }
   update() {
+    // this.flashlight.angle += 5;
     this.movePlayerManager();
     this.reticle.x = input.x;
     this.reticle.y = input.y;
@@ -115,37 +135,42 @@ class scene2 extends Phaser.Scene {
       this.player.y
     );
     this.zombie.setRotation(zombieAngle);
-    this.physics.moveToObject(this.zombie, this.player, 600);
+    this.physics.moveToObject(this.zombie, this.player, 400);
 
     //rotation player with PI/2
     this.player.setRotation(angle); // + Math.PI / 2);
 
     //  Note the 'true' at the end, this tells it to draw anticlockwise
-    var graphics = this.add.graphics();
 
-    graphics.fillStyle(0xffffff, 0.3);
+    // this.graphics.fillStyle(0xffffff, 0.3);
 
-    graphics.slice(
-      this.player.x,
-      this.player.y,
-      1000,
-      angle + Math.PI / 9,
-      angle - Math.PI / 9,
-      true
-    );
+    // this.graphics.slice(
+    //   this.player.x,
+    //   this.player.y,
+    //   1000,
+    //   angle + Math.PI / 9,
+    //   angle - Math.PI / 9,
+    //   true
+    // );
 
-    graphics.fillPath();
-    setTimeout(function () {
-      graphics.clear();
-    }, 10);
+    // let graphics = this.graphics;
+    // this.graphics.fillPath();
+    // setTimeout(function () {
+    //   graphics.clear();
+    // }, 10);
+    // // this.physics.world.enable(graphics);
 
-    function stunZombie() {
-      this.zombie.setVelocityX(0);
-      this.zombie.setVelocityY(0);
-      debugger;
-    }
+    this.flashlight.x = this.player.x;
+    this.flashlight.y = this.player.y;
+    this.flashlight.setRotation(angle);
+  }
 
-    this.physics.add.overlap(graphics, this.zombie, stunZombie);
+  stunZombie(a, zombie) {
+    // if (a) {
+    this.zombie.body.velocity.x *= -1;
+    this.zombie.body.velocity.y *= -1;
+    // }
+    // debugger;
   }
 
   movePlayerManager() {
