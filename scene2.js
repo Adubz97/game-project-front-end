@@ -1,3 +1,6 @@
+var input;
+var mouse;
+var worldBounds;
 class scene2 extends Phaser.Scene {
   constructor() {
     super("playGame");
@@ -5,7 +8,7 @@ class scene2 extends Phaser.Scene {
 
   create() {
     // Tiles
-    this.tile = this.add.tileSprite(
+    let tiles = this.add.tileSprite(
       150,
       150,
       config.width - 300,
@@ -14,57 +17,63 @@ class scene2 extends Phaser.Scene {
       "tile"
     );
     // this.tile.setTileScale(1/3)
-    this.tile.setOrigin(0, 0);
+    tiles.setOrigin(0, 0);
 
+    const walls = this.physics.add.staticGroup();
     // Top wall
-    this.topWall = this.add.sprite(0, 210, "topWall");
-    this.topWall.setOrigin(0, 0);
-    this.topWall.angle = -90;
-    this.topWall.flipX = true;
+    walls.create(0, -75, "topWall7").setOrigin(0, 0).refreshBody().y += 75;
+    // this.topWall.flipX = true;
 
-    this.topWall7 = this.add.sprite(1350, 0, "topWall7");
-    this.topWall7.setOrigin(0, 0);
+    walls.create(1350, -75, "topWall7").setOrigin(0, 0).refreshBody().y += 75;
 
     //Left wall
-    this.leftWall = this.add.sprite(0, 0, "leftWall");
-    this.leftWall.setOrigin(0, 0);
+    walls.create(-75, 0, "leftWall").setOrigin(0, 0).refreshBody().x += 75;
 
-    this.bottomWall = this.add.sprite(0, 1950, "bottomWall");
-    this.bottomWall.setOrigin(0, 0);
-    this.bottomWall.angle = 270;
+    walls.create(0, 1815, "bottomWall7").setOrigin(0, 0).refreshBody().y -= 75;
 
-    this.rightWall = this.add.sprite(2784, 0, "rightWall");
-    this.rightWall.setOrigin(0, 0);
+    walls.create(2859, 0, "rightWall").setOrigin(0, 0).refreshBody().x -= 75;
 
-    this.bottomWall7 = this.add.sprite(1350, 1740, "bottomWall7");
-    this.bottomWall7.setOrigin(0, 0);
+    walls
+      .create(1350, 1815, "bottomWall7")
+      .setOrigin(0, 0)
+      .refreshBody().y -= 75;
 
-    this.midBottom = this.add.sprite(1500, 1845, "middlePiece");
-    this.midBottom.flipY = true;
+    let midBottom = (this.add.sprite(1500, 1845, "middlePiece").flipY = true);
 
-    this.slantBottom1 = this.add.sprite(1350, 1845, "slantedPiece");
-    this.slantBottom1.flipY = true;
+    let slantBottom = (this.add.sprite(
+      1350,
+      1845,
+      "slantedPiece"
+    ).flipY = true);
 
-    this.slantBottom2 = this.add.sprite(1650, 1845, "slantedPiece");
-    this.slantBottom2.flipY = true;
-    this.slantBottom2.flipX = true;
+    let slantBottom2 = this.add.sprite(1650, 1845, "slantedPiece");
+    slantBottom2.flipY = true;
+    slantBottom2.flipX = true;
 
-    this.midTop = this.add.sprite(1500, 105, "middlePiece");
+    let midTop = this.add.sprite(1500, 105, "middlePiece");
 
-    this.slantTop1 = this.add.sprite(1350, 105, "slantedPiece");
+    let slantTop1 = this.add.sprite(1350, 105, "slantedPiece");
 
-    this.slantTop2 = this.add.sprite(1650, 105, "slantedPiece");
-    this.slantTop2.flipX = true;
+    let slantTop2 = this.add.sprite(1650, 105, "slantedPiece");
+    slantTop2.flipX = true;
+
+    let blackOverlay = this.add.image(0, 0, "black");
+    blackOverlay.setOrigin(0, 0);
+    blackOverlay.setAlpha(0.7);
 
     this.player = this.physics.add.sprite(500, 500, "player");
-    this.player.setOrigin(0, 0);
     this.player.setScale(3);
 
-    this.reticle = this.physics.add.sprite(1000, 1000, "reticle");
+    this.zombie = this.physics.add.sprite(1000, 1000, "zombie");
+    this.zombie.setCollideWorldBounds(true);
+    this.zombie.setScale(3);
+
+    this.reticle = this.physics.add.sprite(650, 500, "reticle");
     this.reticle.setCollideWorldBounds(true);
 
     this.cursorKeys = this.input.keyboard.createCursorKeys();
     this.player.setCollideWorldBounds(true);
+    this.physics.add.collider(this.player, walls);
 
     // this.input.on("pointermove", function (pointer) {
     //   this.reticle.x += pointer.movementX;
@@ -72,30 +81,71 @@ class scene2 extends Phaser.Scene {
     // });
     // this.cameras.main.zoom = 0.5;
 
-    // Creates object for input with WASD kets
-    let moveKeys = this.input.keyboard.addKeys({
-      up: Phaser.Input.Keyboard.KeyCodes.W,
-      down: Phaser.Input.Keyboard.KeyCodes.S,
-      left: Phaser.Input.Keyboard.KeyCodes.A,
-      right: Phaser.Input.Keyboard.KeyCodes.D,
-    });
+    //for mouse click event
+    mouse = this.input.mousePointer;
 
-    // Enables movement of player with WASD keys
-    this.input.keyboard.on("keydown_W", function (event) {
-      this.player.setVelocityY(-800);
-    });
-    this.input.keyboard.on("keydown_S", function (event) {
-      this.player.setVelocityY(800);
-    });
-    this.input.keyboard.on("keydown_A", function (event) {
-      this.player.setVelocityX(-800);
-    });
-    this.input.keyboard.on("keydown_D", function (event) {
-      this.player.setVelocityX(800);
-    });
+    //for mouse position
+    input = this.input;
+
+    //set game bounds
+    let angle = Phaser.Math.Angle.Between(
+      this.player.x,
+      this.player.y,
+      this.reticle.x,
+      this.reticle.y
+    );
+    worldBounds = this.physics.world.bounds;
   }
   update() {
     this.movePlayerManager();
+    this.reticle.x = input.x;
+    this.reticle.y = input.y;
+
+    let angle = Phaser.Math.Angle.Between(
+      this.player.x,
+      this.player.y,
+      this.reticle.x,
+      this.reticle.y
+    );
+
+    let zombieAngle = Phaser.Math.Angle.Between(
+      this.zombie.x,
+      this.zombie.y,
+      this.player.x,
+      this.player.y
+    );
+    this.zombie.setRotation(zombieAngle);
+    this.physics.moveToObject(this.zombie, this.player, 600);
+
+    //rotation player with PI/2
+    this.player.setRotation(angle); // + Math.PI / 2);
+
+    //  Note the 'true' at the end, this tells it to draw anticlockwise
+    var graphics = this.add.graphics();
+
+    graphics.fillStyle(0xffffff, 0.3);
+
+    graphics.slice(
+      this.player.x,
+      this.player.y,
+      1000,
+      angle + Math.PI / 9,
+      angle - Math.PI / 9,
+      true
+    );
+
+    graphics.fillPath();
+    setTimeout(function () {
+      graphics.clear();
+    }, 10);
+
+    function stunZombie() {
+      this.zombie.setVelocityX(0);
+      this.zombie.setVelocityY(0);
+      debugger;
+    }
+
+    this.physics.add.overlap(graphics, this.zombie, stunZombie);
   }
 
   movePlayerManager() {
@@ -115,4 +165,14 @@ class scene2 extends Phaser.Scene {
       this.player.setVelocityY(0);
     }
   }
+
+  // handlePointerMove() {
+  //   const x = this.player.x;
+  //   //this.cover.x + this.cover.width * 0.5;
+  //   const y = this.player.y;
+  //   //this.cover.y + this.cover.height * 0.5;
+
+  //   this.renderTexture.clear();
+  //   this.renderTexture.draw(this.light, x, y);
+  // }
 }

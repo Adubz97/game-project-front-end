@@ -5,7 +5,7 @@ var config = {
   scene: [scene1,scene2],
   scale: {
     mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.BOTH_CENTER,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   pixelArt: true,
   physics: {
@@ -17,10 +17,11 @@ var config = {
 };
 
 var gameSettings = {
-  playerSpeed: 200,
+  playerSpeed: 600,
 };
 
 window.onload = function () {
   var game = new Phaser.Game(config);
 };
+
 

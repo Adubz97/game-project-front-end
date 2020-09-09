@@ -4,6 +4,8 @@ class scene1 extends Phaser.Scene {
   }
 
   preload() {
+    this.load.image("map", "assets/images/Map.png");
+
     this.load.image("tile", "assets/images/0.png");
 
     this.load.image("topWall", "assets/images/9.png");
@@ -26,11 +28,13 @@ class scene1 extends Phaser.Scene {
 
     this.load.image("player", "assets/images/player.png");
 
-    this.load.image("reticle", "assets/images/Bullet.png")
+    this.load.image("reticle", "assets/images/Bullet.png");
 
-    this.load.image("zombie", "assets/images/zombie_hold.png")
+    this.load.image("black", "assets/images/black.png");
 
-    this.load.image("zombieStunned", "assets/images/zombie.png")
+    this.load.image("zombie", "assets/images/zombie1_hold.png")
+
+    this.load.image("zombieStunned", "assets/images/zombie1_stand.png")
   }
   create() {
     this.add.text(20, 20, "Loading...");
