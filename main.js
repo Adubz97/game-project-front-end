@@ -5,7 +5,7 @@ window.onload = function () {
     width: 3000,
     height: 1950,
     backgroundColor: 0x000000,
-    scene: [playgame, scene1],
+    scene: [MainScreen, playgame],
     scale: {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,

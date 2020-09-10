@@ -1,6 +1,11 @@
 var input;
 var mouse;
 var worldBounds;
+
+let keyA;
+let keyS;
+let keyD;
+let keyW;
 class playgame extends Phaser.Scene {
   constructor() {
     super("playgame");
@@ -32,6 +37,13 @@ class playgame extends Phaser.Scene {
     this.load.image("player", "assets/images/player.png");
 
     this.load.image("reticle", "assets/images/Bullet.png");
+
+    //this.load.image("reticle", "assets/images/red.png");
+
+    this.load.spritesheet("fullscreen", "assets/spritesheets/fullscreen.png", {
+      frameWidth: 64,
+      frameHeight: 64,
+    });
 
     this.load.image("black", "assets/images/black.png");
 
@@ -124,8 +136,11 @@ class playgame extends Phaser.Scene {
     }
     //======================================================================
     //reticle aka pointer design w/e
-    this.reticle = this.physics.add.sprite(650, 500, "reticle");
-    this.reticle.setCollideWorldBounds(true);
+    // this.reticle = this.physics.add.sprite(650, 500, "reticle");
+    // this.reticle.setCollideWorldBounds(true);
+    this.input.setDefaultCursor("url(assets/images/blue.cur), pointer");
+      //.setOrigin(1, 1);
+    // pointer.setOrigin(0, 0);
     //======================================================================
 
     //======================================================================
@@ -143,29 +158,68 @@ class playgame extends Phaser.Scene {
     input = this.input;
     //======================================================================
     //set game bounds
-    let angle = Phaser.Math.Angle.Between(
-      this.player.x,
-      this.player.y,
-      this.reticle.x,
-      this.reticle.y
-    );
+    // let angle = Phaser.Math.Angle.Between(
+    //   this.player.x,
+    //   this.player.y,
+    //   this.reticle.x,
+    //   this.reticle.y
+    // );
     worldBounds = this.physics.world.bounds;
     //======================================================================
+    this.physics.add.overlap(
+      this.player,
+      this.zombieGroup,
+      this.hurtPlayer,
+      null,
+      this
+    );
+
+    //keyboard keys
+    keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+    keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    //==================================================================
+
+    // Fullscreen implementation
+    var button = this.add
+      .image(2980, 10, "fullscreen", 0)
+      .setOrigin(1, 0)
+      .setInteractive();
+
+    button.on(
+      "pointerup",
+      function () {
+        if (this.scale.isFullscreen) {
+          button.setFrame(0);
+
+          this.scale.stopFullscreen();
+        } else {
+          button.setFrame(1);
+
+          this.scale.startFullscreen();
+        }
+      },
+      this
+    );
+    //=============================================
   }
 
   update() {
     //player movement
     this.movePlayerManager();
     //reticle follows mouse
-    this.reticle.x = input.x;
-    this.reticle.y = input.y;
+    // this.reticle.x = input.x;
+    // this.reticle.y = input.y;
 
     //angle between reticle and player
     let angle = Phaser.Math.Angle.Between(
       this.player.x,
       this.player.y,
-      this.reticle.x,
-      this.reticle.y
+      // this.reticle.x,
+      // this.reticle.y
+      input.x,
+      input.y
     );
     //rotation player
     this.player.setRotation(angle);
@@ -199,6 +253,46 @@ class playgame extends Phaser.Scene {
     );
   }
 
+  hurtPlayer(player, enemy) {
+    if (this.player.alpha < 1) {
+      return;
+    }
+
+    player.disableBody(true, true);
+    this.flashlight.disableBody(true, true);
+
+    // this.resetPlayer();
+    this.time.addEvent({
+      delay: 1000,
+      callback: this.resetPlayer,
+      callbackScope: this,
+      loop: false,
+    });
+  }
+
+  resetPlayer() {
+    var x = -100;
+    var y = 500;
+    this.player.enableBody(true, x, y, true, true);
+    this.flashlight.enableBody(true, x, y, true, true);
+
+    this.player.alpha = 0.5;
+    // this.flashlight.alpha = 0.2;
+
+    var tween = this.tweens.add({
+      targets: this.player,
+      x: 500,
+      ease: "power1",
+      duration: 1500,
+      repeat: 0,
+      onComplete: function () {
+        this.player.alpha = 1;
+        // this.flashlight.alpha = 1;
+      },
+      callbackScope: this,
+    });
+  }
+
   stunZombie(a, zombie) {
     this.zombieGroup.children.iterate(function (enemy) {
       // enemy.setVelocityX= -5;
@@ -207,17 +301,20 @@ class playgame extends Phaser.Scene {
   }
 
   movePlayerManager() {
-    if (this.cursorKeys.left.isDown) {
+    //moving using wasd and arrow keys :DD
+
+    //left and right
+    if (keyA.isDown || this.cursorKeys.left.isDown) {
       this.player.setVelocityX(-gameSettings.playerSpeed);
-    } else if (this.cursorKeys.right.isDown) {
+    } else if (keyD.isDown || this.cursorKeys.right.isDown) {
       this.player.setVelocityX(gameSettings.playerSpeed);
     } else {
       this.player.setVelocityX(0);
     }
-
-    if (this.cursorKeys.up.isDown) {
+    //up and down
+    if (keyW.isDown || this.cursorKeys.up.isDown) {
       this.player.setVelocityY(-gameSettings.playerSpeed);
-    } else if (this.cursorKeys.down.isDown) {
+    } else if (keyS.isDown || this.cursorKeys.down.isDown) {
       this.player.setVelocityY(gameSettings.playerSpeed);
     } else {
       this.player.setVelocityY(0);
