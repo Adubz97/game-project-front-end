@@ -6,6 +6,7 @@ let keyA;
 let keyS;
 let keyD;
 let keyW;
+
 class playgame extends Phaser.Scene {
   constructor() {
     super("playgame");
@@ -52,6 +53,10 @@ class playgame extends Phaser.Scene {
     this.load.image("zombieStunned", "assets/images/zombie1_stand.png");
 
     this.load.image("flashlight", "assets/images/flashlight.png");
+
+    this.load.image("gem", "assets/images/gem.png");
+
+    this.load.image("heart", "assets/images/heart_1.png");
   }
 
   create() {
@@ -109,10 +114,36 @@ class playgame extends Phaser.Scene {
     blackOverlay.setOrigin(0, 0);
     blackOverlay.setAlpha(0.7);
     //======================================================================
+    this.gems = this.add.group();
+    for (var i = 0; i < 5; i++) {
+      var xx = Phaser.Math.Between(150, config.width - 150);
+      var yy = Phaser.Math.Between(150, config.height - 150);
+      this.gem = this.physics.add.sprite(xx, yy, "gem");
+      this.gem.setScale(1 / 6);
+      this.gem.refreshBody();
+      // this.zombie.setScale(3);
+      // this.zombie.setCollideWorldBounds(true);
+      this.gems.add(this.gem);
+    }
+    //======================================================================
+    this.extralives = this.add.group();
+    for (var i = 0; i < 2; i++) {
+      var xx = Phaser.Math.Between(150, config.width - 150);
+      var yy = Phaser.Math.Between(150, config.height - 150);
+      this.extralife = this.physics.add.sprite(xx, yy, "heart");
+      this.extralife.setScale(1 / 2);
+      this.extralife.refreshBody();
+      // this.zombie.setScale(3);
+      // this.zombie.setCollideWorldBounds(true);
+      this.extralives.add(this.extralife);
+    }
+    //======================================================================
     //flashlight
     this.flashlight = this.physics.add.sprite(490, 490, "flashlight");
     this.flashlight.setOrigin(0.13, 0.44);
     this.flashlight.refreshBody();
+    this.physics.world.enable(this.flashlight);
+    this.flashlight.body.setAllowGravity(false); // so that your image is not affected by gravity
     //======================================================================
     //player
     this.player = this.physics.add.sprite(500, 500, "player");
@@ -121,25 +152,43 @@ class playgame extends Phaser.Scene {
     this.physics.add.collider(this.player, walls);
     this.cursorKeys = this.input.keyboard.createCursorKeys();
     //======================================================================
-    // zombie group #soon
+    var r1 = this.add.triangle(
+      this.player.x,
+      this.player.y,
+      this.player.x + 1400,
+      this.player.y + 300,
+      this.player.x + 1400,
+      this.player.y - 300,
+      this.player.x,
+      this.player.y,
+      0x6666ff
+    );
+    //======================================================================
+    // zombie group
 
     this.zombieGroup = this.add.group();
     this.physics.add.collider(this.zombieGroup, walls);
+    this.physics.add.collider(this.zombieGroup, this.zombieGroup);
 
     for (var i = 0; i < 5; i++) {
-      var xx = Phaser.Math.Between(400, 2800);
-      var yy = Phaser.Math.Between(400, 1700);
+      var xx = Phaser.Math.Between(150, config.width - 150);
+      var yy = Phaser.Math.Between(150, config.height - 150);
       this.zombie = this.physics.add.sprite(xx, yy, "zombie");
       this.zombie.setScale(3);
       this.zombie.setCollideWorldBounds(true);
+      this.zombie.name = "bilbo";
       this.zombieGroup.add(this.zombie);
     }
+    //======================================================================
+    this.life = this.add.group();
+    this.liveCount = 3;
+    this.updateHearts();
     //======================================================================
     //reticle aka pointer design w/e
     // this.reticle = this.physics.add.sprite(650, 500, "reticle");
     // this.reticle.setCollideWorldBounds(true);
     this.input.setDefaultCursor("url(assets/images/blue.cur), pointer");
-      //.setOrigin(1, 1);
+    //.setOrigin(1, 1);
     // pointer.setOrigin(0, 0);
     //======================================================================
 
@@ -174,6 +223,30 @@ class playgame extends Phaser.Scene {
       this
     );
 
+    this.physics.add.overlap(
+      this.player,
+      this.gems,
+      this.pickupGem,
+      null,
+      this
+    );
+
+    this.physics.add.overlap(
+      this.player,
+      this.extralives,
+      this.pickupHeart,
+      null,
+      this
+    );
+
+    this.physics.add.overlap(
+      this.zombieGroup,
+      this.flashlight,
+      this.stunZombie,
+      null,
+      this
+    );
+
     //keyboard keys
     keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
     keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
@@ -203,6 +276,15 @@ class playgame extends Phaser.Scene {
       this
     );
     //=============================================
+
+    // SCOREBOX
+    emitter = new Phaser.Events.EventEmitter();
+    controller = new Controller();
+
+    this.sb = new ScoreBox({ scene: this });
+    this.sb.x = 130;
+    this.sb.y = 40;
+    //============================================
   }
 
   update() {
@@ -235,6 +317,16 @@ class playgame extends Phaser.Scene {
     }, this);
     //zombie follow player
     this.zombieGroup.children.iterate(function (enemy) {
+      // if (enemy.x < this.player.x) {
+      //   enemy.x += 6;
+      // } else {
+      //   enemy.x -= 6;
+      // }
+      // if (enemy.y < this.player.y) {
+      //   enemy.y += 6;
+      // } else {
+      //   enemy.y -= 6;
+      // }
       this.physics.moveToObject(enemy, this.player, 400);
     }, this);
     //======================================================================
@@ -242,34 +334,97 @@ class playgame extends Phaser.Scene {
     this.flashlight.x = this.player.x;
     this.flashlight.y = this.player.y;
     this.flashlight.setRotation(angle);
+    // this.flashlight.body.setRotation(angle);
+
     //======================================================================
     //trying to figure out the ooverlap >:(
-    this.physics.add.overlap(
-      this.flashlight,
-      this.zombieGroup,
-      this.stunZombie(this.flashlight, this.zombie),
-      null,
-      this
-    );
+  }
+
+  pickupGem(player, gem) {
+    gem.disableBody(true, true);
+    model.score += 100;
+    this.sb.scoreUpdated();
+    // this.pickupSound.play();
+    if (this.gems.countActive(true) === 0) {
+      this.gems.children.iterate(function (child) {
+        child.enableBody(
+          true,
+          Phaser.Math.Between(150, config.width - 150),
+          Phaser.Math.Between(150, config.height - 150),
+          true,
+          true
+        );
+      });
+      this.extralives.children.iterate(function (child) {
+        child.enableBody(
+          true,
+          Phaser.Math.Between(150, config.width - 150),
+          Phaser.Math.Between(150, config.height - 150),
+          true,
+          true
+        );
+      });
+
+      // var x =
+      //   this.player.x < config.width / 2
+      //     ? Phaser.Math.Between(config.width / 2, config.width - 150)
+      //     : Phaser.Math.Between(150, config.width / 2);
+
+      // this.zombie = this.zombieGroup.create(x, 800, "zombie");
+      // this.zombie.setScale(3);
+      // zomb.setCollideWorldBounds(true);
+    }
+  }
+  pickupHeart(player, heart) {
+    heart.disableBody(true, true);
+    this.liveCount += 1;
+    this.updateHearts();
+  }
+
+  updateHearts() {
+    this.life.clear(true, true);
+    for (var i = 0; i < this.liveCount; i++) {
+      this.life.create(50 + 75 * i, 100, "heart").setScale(0.5);
+    }
   }
 
   hurtPlayer(player, enemy) {
-    if (this.player.alpha < 1) {
-      return;
+    if (this.liveCount > 1) {
+      if (this.player.alpha < 1) {
+        return;
+      }
+
+      player.disableBody(true, true);
+      this.flashlight.disableBody(true, true);
+
+      // this.resetPlayer();
+      this.time.addEvent({
+        delay: 1000,
+        callback: this.resetPlayer,
+        callbackScope: this,
+        loop: false,
+      });
+      this.liveCount -= 1;
+      this.updateHearts();
+    } else {
+      this.liveCount -= 1;
+      this.updateHearts();
+      this.gameover();
     }
-
-    player.disableBody(true, true);
-    this.flashlight.disableBody(true, true);
-
-    // this.resetPlayer();
-    this.time.addEvent({
-      delay: 1000,
-      callback: this.resetPlayer,
-      callbackScope: this,
-      loop: false,
-    });
+    // if (this.liveCount == 0) {
+    //   this.gameover();
+    // }
   }
 
+  gameover() {
+    this.physics.pause();
+
+    this.player.setTint(0xff0000);
+
+    setTimeout(() => {
+      this.scene.start("Gameover");
+    }, 2000);
+  }
   resetPlayer() {
     var x = -100;
     var y = 500;
@@ -293,11 +448,18 @@ class playgame extends Phaser.Scene {
     });
   }
 
-  stunZombie(a, zombie) {
-    this.zombieGroup.children.iterate(function (enemy) {
-      // enemy.setVelocityX= -5;
-      //console.log("zombo");
-    }, this);
+  stunZombie(enemy) {
+    // this.physics.moveToObject(enemy, this.player, -600);
+    if (enemy.x < this.player.x) {
+      enemy.x -= 7;
+    } else {
+      enemy.x += 7;
+    }
+    if (enemy.y < this.player.y) {
+      enemy.y -= 7;
+    } else {
+      enemy.y += 7;
+    }
   }
 
   movePlayerManager() {
