@@ -9,7 +9,7 @@ class Collaborators extends Phaser.Scene {
     //this.load.image("yellow button", "assets/images/yellow.png");
     this.load.video(
       "credits",
-      "assets/images/credits.mp4",
+      "assets/video/credits.mp4",
       "canplaythrough",
       true,
       true

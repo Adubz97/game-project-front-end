@@ -4,9 +4,10 @@ var model;
 var emitter;
 var G;
 var controller;
+
 window.onload = function () {
   config = {
-    width: 3000,
+    width: 3450,
     height: 1950,
     backgroundColor: 0x0f1c40,
     scene: [MainScreen, Leaderboard, playgame, Gameover, Collaborators],
@@ -28,5 +29,5 @@ window.onload = function () {
 };
 
 var gameSettings = {
-  playerSpeed: 600,
+  playerSpeed: 700,
 };

@@ -6,8 +6,8 @@ class Gameover extends Phaser.Scene {
   preload() {
     // loading button, video, and audio
     this.load.image("yellow button 2", "assets/images/yellow.png");
-    this.load.video( "gameover","assets/images/gameover2.mp4","canplaythrough",true,true);
-    this.load.audio("flickering light", "assets/images/light2.m4a");
+    this.load.video( "gameover","assets/video/gameover2.mp4","canplaythrough",true,true);
+    this.load.audio("flickering light", "assets/sounds/light2.m4a");
   }
 
   create() {

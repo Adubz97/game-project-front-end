@@ -13,6 +13,8 @@ class playgame extends Phaser.Scene {
   }
 
   preload() {
+    this.load.audio("zombieSound", "assets/sounds/zombie.mp3");
+
     this.load.image("map", "assets/images/Map.png");
 
     this.load.image("tile", "assets/images/0.png");
@@ -29,7 +31,7 @@ class playgame extends Phaser.Scene {
 
     this.load.image("slantedPiece", "assets/images/24.png");
 
-    this.load.image("middlePiece", "assets/images/23.png");
+    this.load.image("middlePiece", "assets/images/15.png");
 
     this.load.image("bottomWall7", "assets/images/4.png");
 
@@ -38,6 +40,8 @@ class playgame extends Phaser.Scene {
     this.load.image("player", "assets/images/player.png");
 
     this.load.image("reticle", "assets/images/Bullet.png");
+
+    this.load.image("block", "assets/images/16.png");
 
     //this.load.image("reticle", "assets/images/red.png");
 
@@ -50,6 +54,8 @@ class playgame extends Phaser.Scene {
 
     this.load.image("zombie", "assets/images/zombie1_hold.png");
 
+    this.load.image("zombiestun", "assets/images/zombie1_stand.png");
+
     this.load.image("zombieStunned", "assets/images/zombie1_stand.png");
 
     this.load.image("flashlight", "assets/images/flashlight.png");
@@ -57,15 +63,16 @@ class playgame extends Phaser.Scene {
     this.load.image("gem", "assets/images/gem.png");
 
     this.load.image("heart", "assets/images/heart_1.png");
+    this.load.image("obstacles", "assets/images/20.png");
   }
 
   create() {
     //this creates the tiles for the game
     let tiles = this.add.tileSprite(
-      150,
-      150,
-      config.width - 300,
-      config.height - 300,
+      0,
+      0,
+      config.width,
+      config.height,
 
       "tile"
     );
@@ -77,37 +84,64 @@ class playgame extends Phaser.Scene {
 
     walls.create(0, -75, "topWall7").setOrigin(0, 0).refreshBody().y += 75;
 
-    walls.create(1350, -75, "topWall7").setOrigin(0, 0).refreshBody().y += 75;
+    walls.create(1800, -75, "topWall7").setOrigin(0, 0).refreshBody().y += 75;
 
     walls.create(-75, 0, "leftWall").setOrigin(0, 0).refreshBody().x += 75;
 
     walls.create(0, 1815, "bottomWall7").setOrigin(0, 0).refreshBody().y -= 75;
 
-    walls.create(2859, 0, "rightWall").setOrigin(0, 0).refreshBody().x -= 75;
+    walls.create(3309, 0, "rightWall").setOrigin(0, 0).refreshBody().x -= 75;
 
     walls
-      .create(1350, 1815, "bottomWall7")
+      .create(1800, 1815, "bottomWall7")
       .setOrigin(0, 0)
       .refreshBody().y -= 75;
 
-    let midBottom = (this.add.sprite(1500, 1845, "middlePiece").flipY = true);
+    this.add.image(1725, 1888, "block").flipY = true;
+    let midBottom = (this.add.sprite(1725, 1888, "middlePiece").flipY = true);
 
     let slantBottom = (this.add.sprite(
-      1350,
+      1570,
       1845,
       "slantedPiece"
     ).flipY = true);
 
-    let slantBottom2 = this.add.sprite(1650, 1845, "slantedPiece");
+    let slantBottom2 = this.add.sprite(1880, 1845, "slantedPiece");
     slantBottom2.flipY = true;
     slantBottom2.flipX = true;
 
-    let midTop = this.add.sprite(1500, 105, "middlePiece");
+    this.add.image(1725, 60, "block");
+    let midTop = this.add.sprite(1725, 60, "middlePiece");
 
-    let slantTop1 = this.add.sprite(1350, 105, "slantedPiece");
+    let slantTop1 = this.add.sprite(1570, 105, "slantedPiece");
 
-    let slantTop2 = this.add.sprite(1650, 105, "slantedPiece");
+    let slantTop2 = this.add.sprite(1880, 105, "slantedPiece");
     slantTop2.flipX = true;
+    //=====================================
+    //obstacles
+    this.obstacles = this.physics.add.staticGroup();
+    for (var i = 0; i < 10; i++) {
+      this.obstacles.create(378 + 300 * i, 370, "obstacles");
+    }
+    for (var i = 0; i < 10; i++) {
+      this.obstacles.create(378 + 300 * i, 670, "obstacles");
+    }
+    for (var i = 0; i < 10; i++) {
+      this.obstacles.create(378 + 300 * i, 970, "obstacles");
+    }
+    for (var i = 0; i < 10; i++) {
+      this.obstacles.create(378 + 300 * i, 1270, "obstacles");
+    }
+    for (var i = 0; i < 10; i++) {
+      this.obstacles.create(378 + 300 * i, 1570, "obstacles");
+    }
+    // this.obstacles.create(378, 370, "obstacles");
+    // this.obstacles.create(678, 370, "obstacles");
+    // this.obstacles.create(978, 370, "obstacles");
+    // this.obstacles.create(1278, 370, "obstacles");
+    // this.obstacles.create(1578, 370, "obstacles");
+    // this.obstacles.create(1878, 370, "obstacles");
+
     //======================================================================
     //black tint for map
     let blackOverlay = this.add.image(0, 0, "black");
@@ -148,21 +182,14 @@ class playgame extends Phaser.Scene {
     //player
     this.player = this.physics.add.sprite(500, 500, "player");
     this.player.setScale(3);
+    this.player.body.setSize(30, 30);
     this.player.setCollideWorldBounds(true);
     this.physics.add.collider(this.player, walls);
     this.cursorKeys = this.input.keyboard.createCursorKeys();
     //======================================================================
-    var r1 = this.add.triangle(
-      this.player.x,
-      this.player.y,
-      this.player.x + 1400,
-      this.player.y + 300,
-      this.player.x + 1400,
-      this.player.y - 300,
-      this.player.x,
-      this.player.y,
-      0x6666ff
-    );
+    this.circ = this.add.circle(this.input.x, this.input.y, 220, 0x6666ff, 0);
+    this.physics.world.enable(this.circ);
+    this.circ.body.setCircle(220, 0, 0);
     //======================================================================
     // zombie group
 
@@ -170,11 +197,16 @@ class playgame extends Phaser.Scene {
     this.physics.add.collider(this.zombieGroup, walls);
     this.physics.add.collider(this.zombieGroup, this.zombieGroup);
 
-    for (var i = 0; i < 5; i++) {
+    this.physics.add.collider(this.obstacles, this.player);
+    this.physics.add.collider(this.obstacles, this.gems);
+    this.physics.add.collider(this.obstacles, this.extralives);
+
+    for (var i = 0; i < 6; i++) {
       var xx = Phaser.Math.Between(150, config.width - 150);
       var yy = Phaser.Math.Between(150, config.height - 150);
       this.zombie = this.physics.add.sprite(xx, yy, "zombie");
       this.zombie.setScale(3);
+      this.zombie.body.setSize(30, 30);
       this.zombie.setCollideWorldBounds(true);
       this.zombie.name = "bilbo";
       this.zombieGroup.add(this.zombie);
@@ -239,9 +271,17 @@ class playgame extends Phaser.Scene {
       this
     );
 
+    this.physics.add.collider(
+      this.obstacles,
+      this.zombieGroup,
+      this.pathfind,
+      null,
+      this
+    );
+
     this.physics.add.overlap(
       this.zombieGroup,
-      this.flashlight,
+      this.circ,
       this.stunZombie,
       null,
       this
@@ -256,7 +296,7 @@ class playgame extends Phaser.Scene {
 
     // Fullscreen implementation
     var button = this.add
-      .image(2980, 10, "fullscreen", 0)
+      .image(3420, 10, "fullscreen", 0)
       .setOrigin(1, 0)
       .setInteractive();
 
@@ -285,14 +325,30 @@ class playgame extends Phaser.Scene {
     this.sb.x = 130;
     this.sb.y = 40;
     //============================================
+    // let musicSettings = {
+    //   mute: false,
+    //   volume: 1,
+    //   rate: 1,
+    //   loop: true,
+    //   delay: 5000,
+    // };
+    // added zombie sound
+    this.zombieSound = this.sound.add("zombieSound");
+    this.zombieSound.play();
   }
 
   update() {
+    if (this.player.y < 150) {
+      this.player.y = config.height - 150;
+    }
+    if (this.player.y > config.height - 150) {
+      this.player.y = 150;
+    }
     //player movement
     this.movePlayerManager();
     //reticle follows mouse
-    // this.reticle.x = input.x;
-    // this.reticle.y = input.y;
+    this.circ.x = input.x;
+    this.circ.y = input.y;
 
     //angle between reticle and player
     let angle = Phaser.Math.Angle.Between(
@@ -340,6 +396,19 @@ class playgame extends Phaser.Scene {
     //trying to figure out the ooverlap >:(
   }
 
+  pathfind(zombie, obstacle) {
+    if (zombie.x > obstacle.x) {
+      zombie.x += 1;
+    } else {
+      zombie.x -= 1;
+    }
+    if (zombie.y > obstacle.y) {
+      zombie.y += 1;
+    } else {
+      zombie.y -= 1;
+    }
+  }
+
   pickupGem(player, gem) {
     gem.disableBody(true, true);
     model.score += 100;
@@ -364,7 +433,15 @@ class playgame extends Phaser.Scene {
           true
         );
       });
-
+      for (var i = 0; i < 2; i++) {
+        var xx = Phaser.Math.Between(150, config.width - 150);
+        var yy = Phaser.Math.Between(150, config.height - 150);
+        this.zombie = this.physics.add.sprite(xx, yy, "zombie");
+        this.zombie.setScale(3);
+        this.zombie.setCollideWorldBounds(true);
+        this.zombie.name = "bilbo";
+        this.zombieGroup.add(this.zombie);
+      }
       // var x =
       //   this.player.x < config.width / 2
       //     ? Phaser.Math.Between(config.width / 2, config.width - 150)
@@ -376,9 +453,11 @@ class playgame extends Phaser.Scene {
     }
   }
   pickupHeart(player, heart) {
-    heart.disableBody(true, true);
-    this.liveCount += 1;
-    this.updateHearts();
+    if (this.liveCount < 4) {
+      heart.disableBody(true, true);
+      this.liveCount += 1;
+      this.updateHearts();
+    }
   }
 
   updateHearts() {
@@ -393,7 +472,6 @@ class playgame extends Phaser.Scene {
       if (this.player.alpha < 1) {
         return;
       }
-
       player.disableBody(true, true);
       this.flashlight.disableBody(true, true);
 
@@ -418,8 +496,20 @@ class playgame extends Phaser.Scene {
 
   gameover() {
     this.physics.pause();
-
+    this.zombieSound.stop();
     this.player.setTint(0xff0000);
+
+    fetch("http://localhost:3000/scores", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        number: model.score,
+        user_id: document.getElementById("utext").value
+      }),
+    });
 
     setTimeout(() => {
       this.scene.start("Gameover");
@@ -433,7 +523,7 @@ class playgame extends Phaser.Scene {
 
     this.player.alpha = 0.5;
     // this.flashlight.alpha = 0.2;
-
+    this.physics.pause();
     var tween = this.tweens.add({
       targets: this.player,
       x: 500,
@@ -442,6 +532,7 @@ class playgame extends Phaser.Scene {
       repeat: 0,
       onComplete: function () {
         this.player.alpha = 1;
+        this.physics.resume();
         // this.flashlight.alpha = 1;
       },
       callbackScope: this,
@@ -451,14 +542,14 @@ class playgame extends Phaser.Scene {
   stunZombie(enemy) {
     // this.physics.moveToObject(enemy, this.player, -600);
     if (enemy.x < this.player.x) {
-      enemy.x -= 7;
+      enemy.x -= 5;
     } else {
-      enemy.x += 7;
+      enemy.x += 5;
     }
     if (enemy.y < this.player.y) {
-      enemy.y -= 7;
+      enemy.y -= 5;
     } else {
-      enemy.y += 7;
+      enemy.y += 5;
     }
   }
 

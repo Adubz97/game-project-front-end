@@ -7,28 +7,29 @@ class MainScreen extends Phaser.Scene {
     //loading main menu graphic and the buttons
     this.load.video(
       "main3",
-      "assets/images/main3.mp4",
+      "assets/video/main3.mp4",
       "canplaythrough",
       true,
       true
     );
     this.load.image("yellow button", "assets/images/yellow.png");
     this.load.image("yellow button 2", "assets/images/yellow.png");
-    this.load.audio("flickering light", "assets/images/light2.m4a");
+    this.load.audio("flickering light", "assets/sounds/light2.m4a");
   }
 
   create() {
+    this.input.setDefaultCursor("url(assets/images/blue.cur), pointer");
     //even listener
     emitter = new Phaser.Events.EventEmitter();
     controller = new Controller();
     //============================================
     //music
-    var videoSettings = {
+    let videoSettings = {
       loop: true,
       delay: 0,
     };
 
-    var musicSettings = {
+    let musicSettings = {
       mute: false,
       volume: 1,
       rate: 1,
@@ -36,7 +37,7 @@ class MainScreen extends Phaser.Scene {
       delay: 0,
     };
     // added video and music
-    this.add.video(1500, 1155, "main3").play(videoSettings);
+    this.add.video(1725, 1155, "main3").play(videoSettings);
     this.lightSound = this.sound.add("flickering light");
     this.lightSound.play(musicSettings);
     // music.sound.on('decoded', 'flickering light');
@@ -46,8 +47,8 @@ class MainScreen extends Phaser.Scene {
     var flatButton = new FlatButton({
       scene: this,
       key: "yellow button",
-      text: "start game!",
-      x: 1500,
+      text: "Start game!",
+      x: 1725,
       y: 1550,
       event: "start_game",
       params: "start_game",
@@ -58,7 +59,7 @@ class MainScreen extends Phaser.Scene {
       scene: this,
       key: "yellow button 2",
       text: "Leaderboard",
-      x: 1500,
+      x: 1725,
       y: 1700,
       event: "leaderboard",
       params: "leaderboard",
@@ -68,7 +69,7 @@ class MainScreen extends Phaser.Scene {
       scene: this,
       key: "yellow button 2",
       text: "Collaborators",
-      x: 1500,
+      x: 1725,
       y: 1850,
       event: "collaborators",
       params: "collaborators",
