@@ -202,8 +202,8 @@ class playgame extends Phaser.Scene {
     this.physics.add.collider(this.obstacles, this.extralives);
 
     for (var i = 0; i < 6; i++) {
-      var xx = Phaser.Math.Between(150, config.width - 150);
-      var yy = Phaser.Math.Between(150, config.height - 150);
+      var xx = Phaser.Math.Between(1000, config.width - 150);
+      var yy = Phaser.Math.Between(1000, config.height - 150);
       this.zombie = this.physics.add.sprite(xx, yy, "zombie");
       this.zombie.setScale(3);
       this.zombie.body.setSize(30, 30);

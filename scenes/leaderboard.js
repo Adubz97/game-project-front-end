@@ -5,13 +5,13 @@ class Leaderboard extends Phaser.Scene {
 
   preload() {
     // loading button
-    this.load.image("test", "assets/images/222.jpg");
+    // this.load.image("test", "assets/images/222.jpg");
     this.load.image("yellow button", "assets/images/yellow.png");
   }
 
   create() {
     // test image
-    this.add.sprite(600, 600, "test");
+    // this.add.sprite(600, 600, "test");
     //============================================
     //button that takes us to main menu
     var flatButton = new FlatButton({
