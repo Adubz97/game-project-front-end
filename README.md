@@ -13,9 +13,9 @@ A game in which a player holds a flashlight to scare away zombies while collecti
 
 ## Installation...
 - Fork and clone this repo
-- To run this application, cd into the file directory
- -
- -
+- To run this application
+ - Install live server extension.
+ - Right click on index.html and click "Open With Live Server".
   
 ## Authors
 - Abdullah Albasha (https://github.com/Adubz97)
