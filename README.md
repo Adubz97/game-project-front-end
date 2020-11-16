@@ -17,7 +17,7 @@ A game in which a player holds a flashlight to scare away zombies while collecti
  - Install live server extension.
  - Right click on index.html and click "Open With Live Server".
   
-## Authors
+## 👤 Authors
 - Abdullah Albasha (https://github.com/Adubz97)
 
 - Penn Diba (https://github.com/pennd44)
@@ -25,5 +25,5 @@ A game in which a player holds a flashlight to scare away zombies while collecti
 ## Contributing
 Bug reports and pull requests are welcome on GitHub at https://github.com/Adubz97/game-project-front-end/issues. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
-## License 
+## 📝 License 
 The code is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
