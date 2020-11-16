@@ -2,6 +2,9 @@
 # FlashLight
 A game in which a player holds a flashlight to scare away zombies while collecting Ruby gems !
 
+## FlashLight - Demo
+[![FlashLight Demo Video](https://img.youtube.com/vi/hvUnfy2FNpA/0.jpg)](https://youtu.be/hvUnfy2FNpA)
+
 ## Available features
  - **Player can navigate between obstacles and collect ruby gems.**
  - **Player can collect a maximam of for hearts.**
@@ -14,10 +17,6 @@ A game in which a player holds a flashlight to scare away zombies while collecti
  -
  -
   
-  
-## FlashLight - Demo
-[![FlashLight Demo Video](https://img.youtube.com/vi/hvUnfy2FNpA/0.jpg)](https://youtu.be/hvUnfy2FNpA)
-
 ## Authors
 - Abdullah Albasha (https://github.com/Adubz97)
 
